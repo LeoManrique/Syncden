@@ -11,9 +11,9 @@ success() { echo -e "  ${GREEN}✓ $1${NC}"; }
 warn()    { echo -e "  ${YELLOW}⚠ $1${NC}"; }
 error()   { echo -e "  ${RED}✗ $1${NC}"; exit 1; }
 
-REPO="LeoManrique/LeoSync"
+REPO="LeoManrique/Syncden"
 API_URL="https://api.github.com/repos/$REPO/releases/latest"
-TMP_DIR="/tmp/leosync-install"
+TMP_DIR="/tmp/syncden-install"
 
 # ── Step 1: Detect platform ──
 step 1 "Detecting platform"
@@ -34,7 +34,7 @@ esac
 success "Platform: $PLATFORM"
 
 # ── Step 2: Stop running app + daemon ──
-# The daemon (`leosyncd`) is a long-lived process spawned by the GUI, so
+# The daemon (`syncdend`) is a long-lived process spawned by the GUI, so
 # replacing the binaries on disk does NOT update the running code. If it
 # keeps running across an upgrade it serves stale logic until killed — and
 # things like the OAuth client credentials live in memory, so a fresh login
@@ -42,7 +42,7 @@ success "Platform: $PLATFORM"
 # in the new release never takes effect.
 step 2 "Stopping running app + daemon"
 
-PROCS=(LeoSync leosync leosyncd)
+PROCS=(Syncden syncden syncdend)
 RUNNING=()
 for p in "${PROCS[@]}"; do
   if pgrep -x "$p" >/dev/null 2>&1; then RUNNING+=("$p"); fi
@@ -90,8 +90,8 @@ success "Latest version: $VERSION (tag: $TAG)"
 step 4 "Downloading artifact"
 
 case "$OS" in
-  darwin) ARTIFACT="LeoSync-$VERSION-$PLATFORM.zip" ;;
-  linux)  ARTIFACT="LeoSync-$VERSION-$PLATFORM.tar.gz" ;;
+  darwin) ARTIFACT="Syncden-$VERSION-$PLATFORM.zip" ;;
+  linux)  ARTIFACT="Syncden-$VERSION-$PLATFORM.tar.gz" ;;
 esac
 
 DOWNLOAD_URL=$(echo "$RELEASE_JSON" | grep -o '"browser_download_url"[[:space:]]*:[[:space:]]*"[^"]*'"$ARTIFACT"'"' | head -1 | sed 's/.*"browser_download_url"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')
@@ -105,34 +105,34 @@ curl -fSL --progress-bar -o "$TMP_DIR/$ARTIFACT" "$DOWNLOAD_URL" \
 success "Downloaded $ARTIFACT"
 
 # ── Step 5: Install ──
-step 5 "Installing LeoSync"
+step 5 "Installing Syncden"
 
 case "$OS" in
   darwin)
     unzip -qo "$TMP_DIR/$ARTIFACT" -d "$TMP_DIR"
-    if [ -d "/Applications/LeoSync.app" ]; then
-      rm -rf "/Applications/LeoSync.app"
-      warn "Replaced existing /Applications/LeoSync.app"
+    if [ -d "/Applications/Syncden.app" ]; then
+      rm -rf "/Applications/Syncden.app"
+      warn "Replaced existing /Applications/Syncden.app"
     fi
-    mv "$TMP_DIR/LeoSync.app" "/Applications/LeoSync.app"
-    xattr -cr "/Applications/LeoSync.app" 2>/dev/null || true
-    success "Installed to /Applications/LeoSync.app"
+    mv "$TMP_DIR/Syncden.app" "/Applications/Syncden.app"
+    xattr -cr "/Applications/Syncden.app" 2>/dev/null || true
+    success "Installed to /Applications/Syncden.app"
     ;;
   linux)
     tar -xzf "$TMP_DIR/$ARTIFACT" -C "$TMP_DIR"
     # Both binaries land in the same dir so the GUI's LocateDaemonBinary()
-    # finds leosyncd next to itself. (The Rust port dropped leosync-cli.)
-    sudo install -Dm755 "$TMP_DIR/leosync"  "/usr/local/bin/leosync"
-    sudo install -Dm755 "$TMP_DIR/leosyncd" "/usr/local/bin/leosyncd"
-    success "Installed leosync, leosyncd to /usr/local/bin/"
+    # finds syncdend next to itself.
+    sudo install -Dm755 "$TMP_DIR/syncden"  "/usr/local/bin/syncden"
+    sudo install -Dm755 "$TMP_DIR/syncdend" "/usr/local/bin/syncdend"
+    success "Installed syncden, syncdend to /usr/local/bin/"
 
     # Desktop entry
-    sudo tee "/usr/share/applications/leosync.desktop" > /dev/null <<EOF
+    sudo tee "/usr/share/applications/syncden.desktop" > /dev/null <<EOF
 [Desktop Entry]
-Name=LeoSync
+Name=Syncden
 Comment=Cross-platform file sync
-Exec=leosync
-Icon=leosync
+Exec=syncden
+Icon=syncden
 Type=Application
 Categories=Utility;Network;
 StartupNotify=true
@@ -147,8 +147,8 @@ step 6 "Cleaning up"
 rm -rf "$TMP_DIR"
 success "Temporary files removed"
 
-echo -e "\n${GREEN}═══ LeoSync $VERSION installed successfully ═══${NC}"
+echo -e "\n${GREEN}═══ Syncden $VERSION installed successfully ═══${NC}"
 case "$OS" in
-  darwin) echo -e "  ${CYAN}Open LeoSync from /Applications or Spotlight${NC}" ;;
-  linux)  echo -e "  ${CYAN}Run 'leosync' or find LeoSync in your app launcher${NC}" ;;
+  darwin) echo -e "  ${CYAN}Open Syncden from /Applications or Spotlight${NC}" ;;
+  linux)  echo -e "  ${CYAN}Run 'syncden' or find Syncden in your app launcher${NC}" ;;
 esac
