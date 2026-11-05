@@ -7,12 +7,12 @@ Sync files across devices, including offline changes.
 ### macOS / Linux
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/LeoManrique/LeoSync/master/scripts/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/LeoManrique/Syncden/master/scripts/install.sh | bash
 ```
 
 ### Windows / iOS / Android
 
-Download the latest installer from [Releases](https://github.com/LeoManrique/LeoSync/releases).
+Download the latest installer from [Releases](https://github.com/LeoManrique/Syncden/releases).
 
 ## Usage
 
